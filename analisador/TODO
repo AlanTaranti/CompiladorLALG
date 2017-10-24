@@ -1,0 +1,5 @@
+colocar linha do erro
+tratar identificador iniciado com numero
+continuar analise apos erro a partir de proximo token
+retorno da funcao status + mensagem de erro
+tratar comentario
