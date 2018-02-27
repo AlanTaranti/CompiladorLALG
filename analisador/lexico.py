@@ -11,15 +11,17 @@ class Lexico():
         import pandas as pd
 
         import os
+
+        import re
         
         # Armazena a string
         self.string = string
         
         # Controle do index
         self.index = 0
-        
-        # Tamanho
-        self.tam = len(string)
+
+        # Controle de linha
+        self.linha = 1
         
         # Tabela estados
         dir = os.path.dirname(os.path.abspath(__file__))
@@ -42,6 +44,13 @@ class Lexico():
             'while',
             'then',
         ]
+
+        # Remover comentarios
+        p = re.compile("\{[\w, ]+\}")
+        self.string = p.sub('', self.string)
+
+        # Tamanho
+        self.tam = len(self.string)
         
     # Verifica se o caracter eh reconhecido
     def caracter_reconhecido(self,item):
