@@ -4,13 +4,9 @@
 # Desenvolvedor: Alan Taranti
 #
 
-class Lexico():
+class Lexico:
     
-    def __init__(self,string):
-        
-        import pandas as pd
-
-        import os
+    def __init__(self, string):
 
         import re
         
@@ -22,115 +18,112 @@ class Lexico():
 
         # Controle de linha
         self.linha = 1
-        
-        # Tabela estados
-        dir = os.path.dirname(os.path.abspath(__file__))
-        filepath = dir+'/tabela_estados.csv'
-        self.tabela_estados = pd.read_csv(filepath)
-        
-        # Palavras reservadas
-        self.palavras_reservadas = [
-            'program',
-            'var',
-            'real',
-            'integer',
-            'procedure',
-            'begin',
-            'end',
-            'read',
-            'write',
-            'if',
-            'else',
-            'while',
-            'then',
-        ]
 
         # Remover comentarios
         p = re.compile("\{[\w, ]+\}")
-        self.string = p.sub('', self.string)
+        self.string = p.sub(' ', self.string)
+
+        # Separar end de ponto
+        p = re.compile("(end\.)")
+        self.string = p.sub('end .', self.string)
+
+        # Separar tokens
+        p = re.compile("[^\S\r\n]+|(;|:=|:|\(|\)|,|<|\+|>|-|=|\*|/|\n)")
+        self.tokens = p.split(self.string)
+        self.tokens = [x for x in self.tokens if x is not None and x is not '']
 
         # Tamanho
-        self.tam = len(self.string)
-        
-    # Verifica se o caracter eh reconhecido
-    def caracter_reconhecido(self,item):
+        self.quantidade_de_tokens = len(self.tokens)
 
-        if item not in self.tabela_estados.columns:
-            print('Erro: Caracter',item,'não reconhecido')
-            return False
-        else:
-            return True
-        
+        #
+        # Tokens
+        #
+
+        # Palavras reservadas
+        self.tipo_token = dict()
+
+        self.tipo_token['palavra_reservada'] = [
+                'program',
+                'var',
+                'real',
+                'integer',
+                'procedure',
+                'begin',
+                'end',
+                'read',
+                'write',
+                'if',
+                'else',
+                'while',
+                'then',
+        ]
+
+        self.tipo_token['especial'] = [
+            '*',
+            '.',
+            ',',
+            '=',
+            '<',
+            '<=',
+            '<>',
+            '/',
+            ';',
+            '>',
+            '>=',
+            ':',
+            ':=',
+            '(',
+            ')',
+            '{',
+            '}',
+            "'",
+            '+',
+            '-'
+        ]
+
+    # Retorna o tipo do token
+    def get_tipo_do_token(self, token):
+
+        import re
+
+        if token in self.tipo_token['especial']:
+            return token
+
+        if token in self.tipo_token['palavra_reservada']:
+            return 'palavra_reservada'
+
+        if re.fullmatch('\d+\.\d+', token):
+            return 'real'
+
+        if re.fullmatch('\d+', token):
+            return 'integer'
+
+        if re.fullmatch('\w+', token):
+            return 'identificador'
+
+        return None
+
     # Retorna o proximo token
     def get_next_token(self):
-        
-        # Ignora os FutureWarning do Pandas
-        import warnings
-        warnings.simplefilter(action='ignore', category=FutureWarning)
-        
-        # Inicializa o buffer e o estado
-        buffer = ''
-        estado = 0
-        
-        while self.index < self.tam:
-            
-            # Extrai o caracter
-            item = self.string[self.index]
-            
-            # Armazena o caracter
-            buffer += item
 
-            # Transforma a string para lidar com os \n \t e etc...
-            item = ('%r'%item)[1:-1]
-
-            # Trata item que não está na tabela
-            if not self.caracter_reconhecido(item):
-                return None
-
-            # Armazena o novo estado
-            estado = self.tabela_estados[item][estado]
-
-            # Verifica o proximo estado
-            if self.index < self.tam-1:
-                
-                # Transforma a string para lidar com os \n \t e etc...
-                prox_item = ('%r'%self.string[self.index+1])[1:-1]
-                
-                # Trata item que não está na tabela
-                if not self.caracter_reconhecido(prox_item):
-                    return None
-
-                # Verifica o proximo estado
-                prox_estado = self.tabela_estados[prox_item][estado]
-                
-            else:
-                
-                # Se já estiver no final da string, proximo estado é NaN
-                prox_estado = float('nan')
-                
-            # Incrementa o index
+        if self.index < self.quantidade_de_tokens:
+            token = self.tokens[self.index]
             self.index += 1
 
-            # Se o proximo estado for NaN, ou seja inalcançável, retorna o token se não for um espaço
-            if prox_estado != prox_estado:
+            while token == '\n':
+                if self.index == self.quantidade_de_tokens:
+                    return None
+                token = self.tokens[self.index]
+                self.index += 1
+                self.linha += 1
 
-                # Nome do token
-                nome = self.tabela_estados['Nome'][estado]
+            tipo_token = self.get_tipo_do_token(token)
 
-                # Se for um identificador, verifica se eh uma palavra reservada
-                if nome == 'ident' and buffer in self.palavras_reservadas:
-                    nome = 'reservada'
+            return {
+                'token': token,
+                'tipo': tipo_token,
+                'linha': self.linha
+            }
 
-                # Se o token não for espaço, imprime ele
-                if nome != 'espaco':
-                    return {
-                        'token': buffer,
-                        'id_token': nome
-                    }
-                # Se for um espaço, reseta o buffer e o estado
-                else:
-                    buffer = ''
-                    estado = 0
-                    
-        # Se acabou o arquivo, retorna None
-        return None
+        else:
+            return None
