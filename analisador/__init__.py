@@ -1,1 +1,1 @@
-from .lexico import Lexico
+from . lexico import Lexico
