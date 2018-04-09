@@ -7,10 +7,6 @@ Implementação de um compilador da linguagem LALG.
 ## TODO
 * ~~Analisador Léxico~~
 * Analisador Sintático
-* Analisador Semântico
-* Geração de Código Intermediário
-* Otimizador de Código
-* Geração de Código Final
 
 ## Licença
 * MIT License
