@@ -2,6 +2,7 @@ program nome2;
 {exemplo 2}
 var a: real;
 var b: integer;
+var z: 3.2;
 procedure nomep(x: real);
 var a, c: integer;
 begin
