@@ -1,1 +1,0 @@
-from analisador import Lexico

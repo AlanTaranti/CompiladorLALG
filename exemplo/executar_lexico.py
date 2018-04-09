@@ -11,11 +11,14 @@ if __name__ == "__main__":
 
     import sys, os
 
+    sys.path.append("..")
+
+    from analisador import Lexico
+
     dir = os.path.dirname(os.path.abspath(__file__))
     dirpath = '/'.join((dir).split('/')[:-1])+'/analisador'
     sys.path.append(dirpath)
 
-    from lexico import Lexico
 
     #
     # Ler o Arquivo
@@ -41,8 +44,12 @@ if __name__ == "__main__":
     # Enquanto não acabar os tokens, imprimí-los
     while item is not None:
 
-        # Imprimir dados do token
-        print('Token:',item['token'],'\t\t','ID',item['id_token'])
+        if item['tipo'] is not None:
+            # Imprimir dados do token
+            print('Token:',item['token'],'\t\t','ID',item['tipo'])
+        else:
+            # Imprimir mensagem de erro
+            print('Erro: Token', item['token'], 'não reconhecido na linha:', item['linha'])
 
         # Extrair o proximo token
         item = lex.get_next_token()
