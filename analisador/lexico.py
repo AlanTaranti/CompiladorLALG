@@ -4,6 +4,7 @@
 # Desenvolvedor: Alan Taranti
 #
 
+
 class Lexico:
     
     def __init__(self, string):
@@ -101,7 +102,7 @@ class Lexico:
         if re.fullmatch('\w+', token):
             return 'identificador'
 
-        return None
+        return 'desconhecido'
 
     # Retorna o proximo token
     def get_next_token(self):
