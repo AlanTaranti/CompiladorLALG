@@ -42,7 +42,7 @@ if __name__ == "__main__":
     item = lex.get_next_token()
 
     # Enquanto não acabar os tokens, imprimí-los
-    while item is not None:
+    while item['token'] is not None:
 
         if item['tipo'] is not None:
             # Imprimir dados do token
