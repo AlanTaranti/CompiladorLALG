@@ -4,6 +4,7 @@
 # Desenvolvedor: Alan Taranti
 #
 
+
 class Lexico:
     
     def __init__(self, string):
@@ -11,38 +12,38 @@ class Lexico:
         import re
         
         # Armazena a string
-        self.string = string
+        self.__string = string
         
         # Controle do index
-        self.index = 0
+        self.__index = 0
 
         # Controle de linha
-        self.linha = 1
+        self.__linha = 1
 
         # Remover comentarios
         p = re.compile("\{[\w, ]+\}")
-        self.string = p.sub(' ', self.string)
+        self.__string = p.sub(' ', self.__string)
 
         # Separar end de ponto
         p = re.compile("(end\.)")
-        self.string = p.sub('end .', self.string)
+        self.__string = p.sub('end .', self.__string)
 
         # Separar tokens
         p = re.compile("[^\S\r\n]+|(;|:=|:|\(|\)|,|<|\+|>|-|=|\*|/|\n)")
-        self.tokens = p.split(self.string)
-        self.tokens = [x for x in self.tokens if x is not None and x is not '']
+        self.__tokens = p.split(self.__string)
+        self.__tokens = [x for x in self.__tokens if x is not None and x is not '']
 
         # Tamanho
-        self.quantidade_de_tokens = len(self.tokens)
+        self.__quantidade_de_tokens = len(self.__tokens)
 
         #
         # Tokens
         #
 
         # Palavras reservadas
-        self.tipo_token = dict()
+        self.__tipo_token = dict()
 
-        self.tipo_token['palavra_reservada'] = [
+        self.__tipo_token['palavra_reservada'] = [
                 'program',
                 'var',
                 'real',
@@ -56,9 +57,10 @@ class Lexico:
                 'else',
                 'while',
                 'then',
+                'do'
         ]
 
-        self.tipo_token['especial'] = [
+        self.__tipo_token['especial'] = [
             '*',
             '.',
             ',',
@@ -82,14 +84,14 @@ class Lexico:
         ]
 
     # Retorna o tipo do token
-    def get_tipo_do_token(self, token):
+    def __get_tipo_do_token(self, token):
 
         import re
 
-        if token in self.tipo_token['especial']:
+        if token in self.__tipo_token['especial']:
             return token
 
-        if token in self.tipo_token['palavra_reservada']:
+        if token in self.__tipo_token['palavra_reservada']:
             return 'palavra_reservada'
 
         if re.fullmatch('\d+\.\d+', token):
@@ -101,29 +103,62 @@ class Lexico:
         if re.fullmatch('\w+', token):
             return 'identificador'
 
-        return None
+        return 'desconhecido'
 
     # Retorna o proximo token
-    def get_next_token(self):
+    def get_next_token(self, consumir=True):
+        return self.__get_next_token(not consumir)
 
-        if self.index < self.quantidade_de_tokens:
-            token = self.tokens[self.index]
-            self.index += 1
+    # Look Ahead
+    def look_ahead(self, consumir=False):
+        return self.__get_next_token(look_ahead=not consumir)
+
+    # Retorna o proximo token
+    def __get_next_token(self, look_ahead=False):
+
+        index = self.__index
+        linha = self.__linha
+
+        if index < self.__quantidade_de_tokens:
+            token = self.__tokens[index]
+            index += 1
 
             while token == '\n':
-                if self.index == self.quantidade_de_tokens:
-                    return None
-                token = self.tokens[self.index]
-                self.index += 1
-                self.linha += 1
+                if index == self.__quantidade_de_tokens:
 
-            tipo_token = self.get_tipo_do_token(token)
+                    if not look_ahead:
+                        self.__index = index
+                        self.__linha = linha
+
+                    return {
+                        'token': None,
+                        'tipo': None,
+                        'linha': linha
+                    }
+                token = self.__tokens[index]
+                index += 1
+                linha += 1
+
+            tipo_token = self.__get_tipo_do_token(token)
+
+            if not look_ahead:
+                self.__index = index
+                self.__linha = linha
 
             return {
                 'token': token,
                 'tipo': tipo_token,
-                'linha': self.linha
+                'linha': linha
             }
 
         else:
-            return None
+
+            if not look_ahead:
+                self.__index = index
+                self.__linha = linha
+
+            return {
+                'token': None,
+                'tipo': None,
+                'linha': linha
+            }
