@@ -215,42 +215,221 @@ class Sintatico:
 
     def __variaveis(self):
 
-        #self.__busca_token('palavra_reservada', 'integer', printar_erro_sintatico=True)
-        pass
+        # Buscar identificador
+        self.__get_token('identificador')
+
+        # Entra em <mais_var>
+        self.__mais_var()
 
     def __mais_var(self):
-        pass
+
+        # Look ahead ','
+        virgula = self.__look_ahead_token(',')
+
+        if virgula['status']:
+
+            # Consome token
+            self.__get_token(',')
+
+            # Entra em <variaveis>
+            self.__variaveis()
 
     def __dc_p(self):
-        pass
+
+        # Look ahead 'procedure'
+        procedure = self.__look_ahead_token('palavra_reservada', 'procedure')
+
+        if procedure['status']:
+            self.__get_token('palavra_reservada', 'procedure')
+            self.__get_token('identificador')
+            self.__parametros()
+            self.__get_token(';',consumir_se_nao_encontrado=False)
+            self.__corpo_p()
+            self.__dc_p()
 
     def __parametros(self):
-        pass
+        parenteses = self.__look_ahead_token('(')
+
+        if parenteses['status']:
+            self.__get_token('(')
+            self.__lista_par()
+            self.__get_token(')')
 
     def __lista_par(self):
-        pass
+
+        self.__variaveis()
+        self.__get_token(':')
+        self.__tipo_var()
+        self.__mais_par()
 
     def __mais_par(self):
-        pass
+
+        ponto_virgula = self.__look_ahead_token(';')
+
+        if ponto_virgula['status']:
+            self.__get_token(';', consumir_se_nao_encontrado=False)
+            self.__lista_par()
 
     def __corpo_p(self):
-        pass
+        self.__dc_loc()
+        self.__get_token('palavra_reservada', 'begin')
+        self.__comandos()
+        self.__get_token('palavra_reservada', 'end')
+        self.__get_token(';', consumir_se_nao_encontrado=False)
 
     def __dc_loc(self):
-        pass
+        self.__dc_v()
 
     def __lista_arg(self):
-        pass
+        parenteses = self.__look_ahead_token('(')
+
+        if parenteses['status']:
+            self.__get_token('(')
+            self.__argumentos()
+            self.__get_token(')')
 
     def __argumentos(self):
-        pass
+        self.__get_token('identificador')
+        self.__mais_ident()
 
     def __mais_ident(self):
-        pass
+
+        ponto_virgula = self.__look_ahead_token(';')
+
+        if ponto_virgula['status']:
+            self.__get_token(';', consumir_se_nao_encontrado=False)
+            self.__argumentos()
 
     def __pfalsa(self):
-        pass
+        else_token = self.__look_ahead_token('palavra_reservada', 'else')
+
+        if else_token['status']:
+            self.__get_token('palavra_reservada', 'else')
+            self.__cmd()
 
     def __comandos(self):
-        pass
+
+        status = self.__cmd()
+        if status:
+            self.__get_token(';', consumir_se_nao_encontrado=False)
+            self.__comandos()
+
+    def __cmd(self):
+
+        resposta = self.__look_ahead_token(None)
+
+        if resposta['tipo'] == 'identificador':
+            self.__get_token('identificador')
+            atribuicao = self.__look_ahead_token(':=')
+
+            if atribuicao['status']:
+                self.__get_token(':=')
+                self.__expressao()
+            else:
+                self.__lista_arg()
+
+            return True
+        elif resposta['tipo'] == 'palavra_reservada':
+
+            if resposta['token'] in ['read', 'write']:
+                self.__look_ahead_token(None, consumir=True)
+                self.__get_token('(')
+                self.__variaveis()
+                self.__get_token(')')
+            elif resposta['token'] == 'while':
+                self.__look_ahead_token(None, consumir=True)
+                self.__condicao()
+                self.__get_token('palavra_reservada', 'do')
+                self.__cmd()
+            elif resposta['token'] == 'if':
+                self.__look_ahead_token(None, consumir=True)
+                self.__condicao()
+                self.__get_token('palavra_reservada', 'then')
+                self.__cmd()
+                self.__pfalsa()
+            elif resposta['token'] == 'begin':
+                self.__look_ahead_token(None, consumir=True)
+                self.__comandos()
+                self.__get_token('palavra_reservada', 'end')
+            else:
+                return False
+            return True
+        else:
+            return False
+
+    def __condicao(self):
+        self.__expressao()
+        self.__relacao()
+        self.__expressao()
+
+    def __relacao(self):
+        tipos_aceitos = ['=', '<>', '>=', '<=', '>', '<']
+
+        resposta = self.__look_ahead_token(None)
+
+        if resposta['tipo'] in tipos_aceitos:
+            self.__look_ahead_token(None, consumir=True)
+
+    def __expressao(self):
+        self.__termo()
+        self.__outros_termos()
+
+    def __op_un(self):
+        tipos_aceitos = ['+', '-']
+
+        resposta = self.__look_ahead_token(None)
+
+        if resposta['tipo'] in tipos_aceitos:
+            self.__look_ahead_token(None, consumir=True)
+
+    def __outros_termos(self):
+        resposta = self.__op_ad()
+        if resposta:
+            self.__termo()
+            self.__outros_termos()
+
+    def __op_ad(self):
+        resposta = self.__look_ahead_token(None)
+
+        if resposta['tipo'] in ['+', '-']:
+            self.__look_ahead_token(None, consumir=True)
+        else:
+            return False
+        return True
+
+    def __termo(self):
+        self.__op_un()
+        self.__fator()
+        self.__mais_fatores()
+
+    def __mais_fatores(self):
+        resposta = self.__op_mul()
+        if resposta:
+            self.__fator()
+            self.__mais_fatores()
+
+    def __op_mul(self):
+        tipos_aceitos = ['*', '/']
+
+        resposta = self.__look_ahead_token(None)
+
+        if resposta['tipo'] in tipos_aceitos:
+            self.__look_ahead_token(None, consumir=True)
+            return True
+        return False
+
+    def __fator(self):
+        tipos_consumiveis = ['identificador', 'integer', 'real']
+
+        resposta = self.__look_ahead_token(None)
+
+        if resposta['tipo'] in tipos_consumiveis:
+            self.__look_ahead_token(None, consumir=True)
+        elif resposta['tipo'] == '(':
+            self.__look_ahead_token(None, consumir=True)
+            self.__expressao()
+            self.__get_token(')')
+        else:
+            return False
+        return True
 
