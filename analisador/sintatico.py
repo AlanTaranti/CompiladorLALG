@@ -91,42 +91,6 @@ class Sintatico:
 
         return token
 
-    # def __erro_sintatico(self, terminal_esperado=None, nao_terminal_esperado=None,
-    #                      terminal_anterior=None, nao_terminal_anterior=None,
-    #                      terminal_posterior=None, nao_terminal_posterior=None, linha=None, printar_erros=True):
-    #
-    #     if terminal_esperado is None and nao_terminal_esperado is None:
-    #         return
-    #
-    #     if printar_erros:
-    #
-    #         msg = 'Erro - '
-    #
-    #         if linha is not None:
-    #             msg += 'Linha ' + str(linha) + ' - '
-    #
-    #         msg += 'Esperado '
-    #         msg += 'token "' + terminal_esperado + '"' if terminal_esperado is not None else\
-    #             'token do tipo: <' + nao_terminal_esperado + '>'
-    #
-    #         if terminal_anterior is not None:
-    #             msg += ' após ' + terminal_anterior
-    #         elif nao_terminal_anterior is not None:
-    #             msg += ' após <' + nao_terminal_anterior + '>'
-    #
-    #         if (terminal_posterior is not None or nao_terminal_posterior is not None) and \
-    #                 (terminal_anterior is not None or nao_terminal_anterior is not None):
-    #             msg += ' e '
-    #
-    #         if terminal_posterior is not None:
-    #             msg += ' antes de ' + terminal_posterior
-    #         elif nao_terminal_posterior is not None:
-    #                 msg += ' antes de <' + nao_terminal_posterior + '>'
-    #
-    #         print(msg)
-    #
-    #     self.__contador_de_erros_sintaticos += 1
-
     # Método responsável por finalizar a compilação
     def __finalizar_programa(self):
 
