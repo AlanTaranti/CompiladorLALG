@@ -4,6 +4,7 @@
 # Desenvolvedor: Alan Taranti
 #
 
+
 class Lexico:
     
     def __init__(self, string):
@@ -56,6 +57,7 @@ class Lexico:
                 'else',
                 'while',
                 'then',
+                'do'
         ]
 
         self.__tipo_token['especial'] = [
@@ -101,29 +103,62 @@ class Lexico:
         if re.fullmatch('\w+', token):
             return 'identificador'
 
-        return None
+        return 'desconhecido'
 
     # Retorna o proximo token
-    def get_next_token(self):
+    def get_next_token(self, consumir=True):
+        return self.__get_next_token(not consumir)
 
-        if self.__index < self.__quantidade_de_tokens:
-            token = self.__tokens[self.__index]
-            self.__index += 1
+    # Look Ahead
+    def look_ahead(self, consumir=False):
+        return self.__get_next_token(look_ahead=not consumir)
+
+    # Retorna o proximo token
+    def __get_next_token(self, look_ahead=False):
+
+        index = self.__index
+        linha = self.__linha
+
+        if index < self.__quantidade_de_tokens:
+            token = self.__tokens[index]
+            index += 1
 
             while token == '\n':
-                if self.__index == self.__quantidade_de_tokens:
-                    return None
-                token = self.__tokens[self.__index]
-                self.__index += 1
-                self.__linha += 1
+                if index == self.__quantidade_de_tokens:
 
-            tipo_token = self.get_tipo_do_token(token)
+                    if not look_ahead:
+                        self.__index = index
+                        self.__linha = linha
+
+                    return {
+                        'token': None,
+                        'tipo': None,
+                        'linha': linha
+                    }
+                token = self.__tokens[index]
+                index += 1
+                linha += 1
+
+            tipo_token = self.__get_tipo_do_token(token)
+
+            if not look_ahead:
+                self.__index = index
+                self.__linha = linha
 
             return {
                 'token': token,
                 'tipo': tipo_token,
-                'linha': self.__linha
+                'linha': linha
             }
 
         else:
-            return None
+
+            if not look_ahead:
+                self.__index = index
+                self.__linha = linha
+
+            return {
+                'token': None,
+                'tipo': None,
+                'linha': linha
+            }
