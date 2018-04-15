@@ -57,6 +57,7 @@ class Lexico:
                 'else',
                 'while',
                 'then',
+                'do'
         ]
 
         self.__tipo_token['especial'] = [
