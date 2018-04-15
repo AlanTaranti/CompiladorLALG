@@ -122,7 +122,7 @@ class Sintatico:
             if identificador['status']:
 
                 # Busca um ';'
-                self.__get_token(';', token_anterior=identificador['token'])
+                self.__get_token(';', token_anterior=identificador['token'], consumir_se_nao_encontrado=False)
 
             else:
                 # Else do identificador
