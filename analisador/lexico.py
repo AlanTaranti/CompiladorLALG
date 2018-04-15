@@ -106,8 +106,8 @@ class Lexico:
         return 'desconhecido'
 
     # Retorna o proximo token
-    def get_next_token(self):
-        return self.__get_next_token()
+    def get_next_token(self, consumir=True):
+        return self.__get_next_token(not consumir)
 
     # Look Ahead
     def look_ahead(self, consumir=False):
