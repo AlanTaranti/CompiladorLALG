@@ -32,9 +32,16 @@ class Sintatico:
         return token
 
     # Método responsável por consumir o próximo token da fita
-    def __get_token(self, tipo_esperado, token_esperado=None, token_anterior=None, printar_erro_sintatico=True):
+    def __get_token(self, tipo_esperado, token_esperado=None, token_anterior=None, printar_erro_sintatico=True,
+                    consumir_se_nao_encontrado=True):
 
-        token = self.__lexico.get_next_token()
+        consumir = True
+        if not consumir_se_nao_encontrado:
+            token = self.__look_ahead_token(None)
+            if token['tipo'] != tipo_esperado or token_esperado is not None and token['token'] != token_esperado:
+                consumir = False
+
+        token = self.__lexico.get_next_token(consumir)
         token['status'] = True
         msg = str()
 
