@@ -19,17 +19,6 @@ class Sintatico:
     def start(self):
         return self.__programa()
 
-    # Método responsável por iterar na fita até encontrar o token desejado
-    # Durante a busca, informa os erros léxicos e sintaticos encontrados
-    def __busca_token(self, tipo_esperado, token_esperado=None, printar_erro_sintatico=True):
-
-        token = self.__get_token(tipo_esperado, token_esperado, printar_erro_sintatico=printar_erro_sintatico)
-
-        while token['token'] is not None and not token['status']:
-            token = self.__get_token(tipo_esperado, token_esperado, printar_erro_sintatico=printar_erro_sintatico)
-
-        return token
-
     # Método responsável por verificar o próximo token sem andar com a fita
     def __look_ahead_token(self, tipo_esperado, token_esperado=None, consumir=False):
 
@@ -130,16 +119,16 @@ class Sintatico:
 
             else:
                 # Else do identificador
-                self.__busca_token(';')
+                self.__get_token(';', consumir_se_nao_encontrado=False)
         else:
             # Else do program
-            self.__busca_token(';')
+            self.__get_token(';', consumir_se_nao_encontrado=False)
 
         # Entra em <corpo>
         self.__corpo()
 
         # Busca um '.'
-        self.__busca_token('.')
+        self.__get_token('.')
 
         # Finaliza graciosamente o programa
         return self.__finalizar_programa()
@@ -151,13 +140,13 @@ class Sintatico:
         self.__dc()
 
         # Busca 'begin'
-        self.__busca_token('palavra_reservada', 'begin')
+        self.__get_token('palavra_reservada', 'begin')
 
         # Entra em <comandos>
         self.__comandos()
 
         # Busca 'end'
-        self.__busca_token('palavra_reservada', 'end')
+        self.__get_token('palavra_reservada', 'end')
 
     # Trata o não terminal <dc>
     def __dc(self):
@@ -175,25 +164,25 @@ class Sintatico:
         if recursao:
             var = self.__look_ahead_token('palavra_reservada', 'var')
         else:
-            var = self.__busca_token('palavra_reservada', 'var', printar_erro_sintatico=True)
+            var = self.__get_token('palavra_reservada', 'var')
 
         if var['status']:
 
             # Get 'var'
             if recursao:
-                self.__busca_token('palavra_reservada', 'var', printar_erro_sintatico=True)
+                self.__get_token('palavra_reservada', 'var')
 
             # Entra em <variaveis>
             self.__variaveis()
 
             # Busca ':'
-            self.__busca_token(':', printar_erro_sintatico=True)
+            self.__get_token(':')
 
             # Entra em <tipo_var>
             self.__tipo_var()
 
             # Busca ';'
-            self.__busca_token(';', printar_erro_sintatico=True)
+            self.__get_token(';', consumir_se_nao_encontrado=False)
 
             # Entra em <dc_v>
             self.__dc_v(recursao=True)
