@@ -203,15 +203,15 @@ class Sintatico:
 
         # Consumir integer, se existir
         if integer['status']:
-            self.__get_token('palavra_reservada', 'integer', printar_erro_sintatico=True)
+            self.__get_token('palavra_reservada', 'integer')
 
         # Consumir real, se existir
         elif real['status']:
-            self.__get_token('palavra_reservada', 'real', printar_erro_sintatico=True)
+            self.__get_token('palavra_reservada', 'real')
 
         # Informar erro
         else:
-            self.__get_token('palavra_reservada', 'integer ou real', printar_erro_sintatico=True)
+            self.__get_token('palavra_reservada', 'integer ou real')
 
     def __variaveis(self):
 
