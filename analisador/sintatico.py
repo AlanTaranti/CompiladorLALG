@@ -243,7 +243,7 @@ class Sintatico:
             self.__get_token('palavra_reservada', 'procedure')
             self.__get_token('identificador')
             self.__parametros()
-            self.__get_token(';',consumir_se_nao_encontrado=False)
+            self.__get_token(';', consumir_se_nao_encontrado=False)
             self.__corpo_p()
             self.__dc_p()
 
@@ -432,4 +432,3 @@ class Sintatico:
         else:
             return False
         return True
-
